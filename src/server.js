@@ -20,6 +20,9 @@ app.use(express.json());
 
 const allowedOrigins = [
 	"http://localhost:3000",
+	"https://doc-vice-frontend.vercel.app",
+	"https://doc-vice-frontend-git-main-sidratul-muntaha-tubas-projects.vercel.app",
+	"https://doc-vice-frontend-ls3d0pok4-sidratul-muntaha-tubas-projects.vercel.app",
 ];
 
 // Set up CORS with options
