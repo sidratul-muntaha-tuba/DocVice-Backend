@@ -1,0 +1,107 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+  INTERN
+}
+
+model User {
+  id               Int           @id @default(autoincrement())
+  role             Role          @default(PATIENT)
+  name             String
+  email            String        @unique
+  password         String
+  picture          String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  Doctor           Doctor?
+  Patient          Patient?
+  Intern           Intern?
+  approved         Boolean       @default(false)
+  Appointments     Appointment[]
+  doctorScheduleId Int?
+}
+
+model Doctor {
+  id             Int             @id
+  specialization String
+  contactNumber  String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  User           User            @relation(fields: [id], references: [id])
+  Appointments   Appointment[]
+  DoctorSchedule DoctorSchedule?
+}
+
+model Patient {
+  id           Int           @id
+  healthRecord String?
+  User         User          @relation(fields: [id], references: [id])
+  Appointments Appointment[]
+  Query        Query[]
+}
+
+model Intern {
+  id          Int          @id
+  User        User         @relation(fields: [id], references: [id])
+  Suggestions Suggestion[]
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  doctorId  Int
+  date      DateTime
+  status    String
+  createdAt DateTime @default(now())
+  Patient   Patient  @relation(fields: [patientId], references: [id])
+  Doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+}
+
+model Query {
+  id          Int          @id @default(autoincrement())
+  patientId   Int
+  queryText   String
+  createdAt   DateTime     @default(now())
+  Patient     Patient      @relation(fields: [patientId], references: [id])
+  Suggestions Suggestion[]
+}
+
+model Suggestion {
+  id             Int      @id @default(autoincrement())
+  queryId        Int
+  internId       Int
+  suggestionText String
+  createdAt      DateTime @default(now())
+  Query          Query    @relation(fields: [queryId], references: [id])
+  Intern         Intern   @relation(fields: [internId], references: [id])
+}
+
+model HealthTip {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DoctorSchedule {
+  id                     Int      @id @default(autoincrement())
+  offDays                String[] @default([])
+  activeHours            Json[]   @default([])
+  onePatientVisitingTime Int      @default(10)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  doctor                 Doctor   @relation(fields: [id], references: [id])
+}
